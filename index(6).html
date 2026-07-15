@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paid in Installments</title>
+  <meta name="theme-color" content="#070706" />
+  <style>
+    :root{
+      --bg:#070706;
+      --paper:#e8dfcd;
+      --muted:#8f8678;
+      --gold:#a8792c;
+      --red:#7e1418;
+      --line:rgba(232,223,205,.11);
+    }
+
+    *{box-sizing:border-box}
+
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 50% -15%,rgba(168,121,44,.08),transparent 30%),
+        var(--bg);
+      color:var(--paper);
+      font-family:Georgia,"Times New Roman",serif;
+      overflow-x:hidden;
+    }
+
+    .entry{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:90px 24px;
+    }
+
+    .entry-inner{
+      width:min(100%,940px);
+    }
+
+    .kicker{
+      margin-bottom:28px;
+      font:600 10px/1 Arial,sans-serif;
+      letter-spacing:.25em;
+      text-transform:uppercase;
+      color:var(--gold);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(58px,10vw,132px);
+      line-height:.88;
+      font-weight:400;
+      letter-spacing:-.055em;
+      text-transform:uppercase;
+    }
+
+    .begin{
+      margin-top:48px;
+      appearance:none;
+      border:1px solid var(--gold);
+      background:transparent;
+      color:var(--paper);
+      padding:17px 24px;
+      font:700 11px/1 Arial,sans-serif;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+      cursor:pointer;
+    }
+
+    body.started .entry{display:none}
+
+    .reading{display:none}
+
+    body.started .reading{
+      display:block;
+      animation:fadeIn .8s ease both;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0}
+      to{opacity:1}
+    }
+
+    .meters{
+      position:fixed;
+      z-index:30;
+      top:0;
+      left:0;
+      right:0;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      border-bottom:1px solid var(--line);
+      background:rgba(7,7,6,.92);
+      backdrop-filter:blur(12px);
+    }
+
+    .meter{
+      min-height:86px;
+      padding:18px 22px;
+      border-right:1px solid var(--line);
+    }
+
+    .meter:last-child{border-right:0}
+
+    .meter-label{
+      display:block;
+      margin-bottom:8px;
+      font:600 9px/1 Arial,sans-serif;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .meter-value{
+      font-size:clamp(24px,3vw,42px);
+      color:var(--gold);
+      transition:color .25s ease;
+    }
+
+    .poem-wrap{
+      width:min(100%,900px);
+      margin:0 auto;
+      padding:170px 24px 140px;
+    }
+
+    .poem-title{
+      margin:0 0 64px;
+      font-size:clamp(48px,8vw,104px);
+      line-height:.9;
+      font-weight:400;
+      letter-spacing:-.055em;
+      text-transform:uppercase;
+    }
+
+    .poem{
+      font-size:clamp(19px,2vw,28px);
+      line-height:1.68;
+      white-space:pre-wrap;
+    }
+
+    .poem::selection{
+      background:rgba(168,121,44,.35);
+    }
+
+    .ending{
+      margin-top:110px;
+      padding-top:38px;
+      border-top:1px solid var(--line);
+      font-size:clamp(30px,4vw,54px);
+      line-height:1.16;
+      color:var(--paper);
+    }
+
+    .ending strong{
+      color:var(--red);
+      font-weight:400;
+    }
+
+    .foyer{
+      display:inline-block;
+      margin-top:46px;
+      border:1px solid var(--gold);
+      padding:15px 20px;
+      color:var(--paper);
+      text-decoration:none;
+      font:700 10px/1 Arial,sans-serif;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+    }
+
+    @media(max-width:700px){
+      .meters{
+        grid-template-columns:1fr 1fr;
+      }
+
+      .meter:nth-child(3){
+        grid-column:1 / -1;
+        border-top:1px solid var(--line);
+      }
+
+      .poem-wrap{
+        padding-top:230px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="entry">
+    <div class="entry-inner">
+      <div class="kicker">The Kind of Love That Leaves Bruises</div>
+      <h1>Paid in<br />Installments</h1>
+      <button class="begin" id="begin">Begin</button>
+    </div>
+  </section>
+
+  <main class="reading">
+    <div class="meters">
+      <div class="meter">
+        <span class="meter-label">Cost</span>
+        <span class="meter-value" id="money">$0.00</span>
+      </div>
+
+      <div class="meter">
+        <span class="meter-label">Time Given</span>
+        <span class="meter-value" id="time">00:00</span>
+      </div>
+
+      <div class="meter">
+        <span class="meter-label">Still Owed</span>
+        <span class="meter-value" id="owed">Everything</span>
+      </div>
+    </div>
+
+    <article class="poem-wrap">
+      <h2 class="poem-title">Paid in Installments</h2>
+
+      <div class="poem" id="poem">I think I must be paid for in installments
+                         little debts
+                              scattered on the tables
+                                   of those I've loved,
+                                        coins left behind
+                                        forgotten,
+                                        quietly counting themselves.
+
+                        I have always been too expensive;
+     the burden of a gaze measured in quiet sighs,
+          my silences heavy as stones
+               you carry one,
+                         two,
+                              three
+               and still, there is more of me to shoulder.
+
+ And how do I tell you,
+          that I felt your knees buckle
+                    beneath the weight of my unspoken nights
+
+                              the careful selection
+                                   of my words,
+                                        so many knives wrapped in silk,
+                                        so many truths kept pocketed,
+
+                                             holding us down
+                                                  until we no longer move freely
+                                                       among each other's thoughts?
+
+This is the price
+     the erosion of patience,
+                         of kindness,
+                              of soft hands held in darkness
+
+     small payments made daily,
+          until there is only absence left
+               to settle the balance.
+
+I stand here,
+          a storm you never asked for,
+               rain pooling in your open hands,
+
+                    asking silently
+                         if this flood is worth enduring
+                              for glimpses of sunlit moments
+
+                                   brief warmth between clouds,
+                                   fleeting peace before thunder rumbles again.
+
+Some days, I see clearly:
+
+     I am the thing you rescue from drowning,
+          only to drown yourself,
+               with the maelstrom I carry inside.
+
+I wonder,
+     quietly,
+          if anyone can afford the expense of loving me
+
+               if I can afford it myself,
+                    if the currency of my heart
+                         is accepted anywhere but here,
+                              in this shadowed market of confusion.
+
+But still,
+     I lay out my broken pieces
+           wares on a tattered blanket
+
+               hoping you'll find something worth keeping,
+
+                    knowing all the while
+                         that the price
+                              is far
+                                   too
+                                        high.</div>
+
+      <div class="ending">
+        By the time you know the price, <strong>someone has already paid it.</strong>
+      </div>
+
+      <a class="foyer" href="https://thebastardsaint.com/the-foyer">
+        Return to the Foyer
+      </a>
+    </article>
+  </main>
+
+  <script>
+    const begin = document.getElementById("begin");
+    const money = document.getElementById("money");
+    const time = document.getElementById("time");
+    const owed = document.getElementById("owed");
+    const poem = document.getElementById("poem");
+
+    let startedAt = 0;
+    let timer = null;
+
+    begin.addEventListener("click", () => {
+      document.body.classList.add("started");
+      startedAt = Date.now();
+      window.scrollTo({ top: 0, behavior: "instant" });
+
+      timer = setInterval(updateMeters, 100);
+      updateMeters();
+    });
+
+    function updateMeters() {
+      if (!startedAt) return;
+
+      const elapsed = (Date.now() - startedAt) / 1000;
+      const minutes = Math.floor(elapsed / 60);
+      const seconds = Math.floor(elapsed % 60);
+
+      time.textContent =
+        String(minutes).padStart(2, "0") +
+        ":" +
+        String(seconds).padStart(2, "0");
+
+      const scrollable =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+      const progress =
+        scrollable > 0
+          ? Math.min(1, Math.max(0, window.scrollY / scrollable))
+          : 0;
+
+      const readingCost = progress * 6847.32;
+      const timeCost = elapsed * 0.73;
+      const total = readingCost + timeCost;
+
+      money.textContent =
+        "$" +
+        total.toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+
+      if (progress < 0.25) owed.textContent = "Everything";
+      else if (progress < 0.5) owed.textContent = "More";
+      else if (progress < 0.75) owed.textContent = "Still More";
+      else if (progress < 0.97) owed.textContent = "Almost All";
+      else owed.textContent = "Too Much";
+    }
+
+    window.addEventListener("scroll", updateMeters, { passive: true });
+    window.addEventListener("resize", updateMeters);
+
+    window.addEventListener("beforeunload", () => {
+      if (timer) clearInterval(timer);
+    });
+  </script>
+</body>
+</html>
