@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Paid in Installments</title>
+  <meta name="theme-color" content="#070706" />
+  <style>
+    :root{
+      --bg:#070706;
+      --paper:#e8dfcd;
+      --muted:#978d7c;
+      --gold:#a8792c;
+      --red:#7e1418;
+      --line:rgba(232,223,205,.11);
+    }
+
+    *{box-sizing:border-box}
+
+    html{scroll-behavior:smooth}
+
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at 50% -10%,rgba(168,121,44,.07),transparent 28%),
+        var(--bg);
+      color:var(--paper);
+      font-family:Georgia,"Times New Roman",serif;
+      overflow-x:hidden;
+    }
+
+    .header{
+      position:fixed;
+      inset:0 0 auto 0;
+      z-index:30;
+      display:flex;
+      justify-content:space-between;
+      gap:20px;
+      padding:18px 22px;
+      background:linear-gradient(to bottom,rgba(7,7,6,.96),rgba(7,7,6,.68),transparent);
+      pointer-events:none;
+    }
+
+    .header span{
+      font:600 10px/1 Arial,sans-serif;
+      letter-spacing:.22em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .intro{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:110px 24px 80px;
+    }
+
+    .intro-inner{
+      width:min(100%,940px);
+    }
+
+    .kicker{
+      margin-bottom:28px;
+      font:600 10px/1 Arial,sans-serif;
+      letter-spacing:.25em;
+      text-transform:uppercase;
+      color:var(--gold);
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(56px,10vw,132px);
+      line-height:.88;
+      font-weight:400;
+      letter-spacing:-.055em;
+      text-transform:uppercase;
+    }
+
+    .intro p{
+      max-width:680px;
+      margin:42px 0 0;
+      font-size:clamp(20px,2.4vw,31px);
+      line-height:1.52;
+      color:rgba(232,223,205,.76);
+    }
+
+    .begin{
+      margin-top:46px;
+      appearance:none;
+      border:1px solid var(--gold);
+      background:transparent;
+      color:var(--paper);
+      padding:17px 24px;
+      font:700 11px/1 Arial,sans-serif;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+      cursor:pointer;
+    }
+
+    body.started .intro{display:none}
+
+    .experience{display:none}
+
+    body.started .experience{
+      display:block;
+      animation:fadeIn .8s ease both;
+    }
+
+    @keyframes fadeIn{
+      from{opacity:0}
+      to{opacity:1}
+    }
+
+    .total{
+      position:fixed;
+      top:74px;
+      right:clamp(20px,5vw,72px);
+      z-index:25;
+      text-align:right;
+      pointer-events:none;
+    }
+
+    .total-label{
+      display:block;
+      margin-bottom:8px;
+      font:600 9px/1 Arial,sans-serif;
+      letter-spacing:.21em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .total-value{
+      font-size:clamp(32px,4vw,58px);
+      color:var(--gold);
+      transition:color .4s ease,transform .4s ease;
+    }
+
+    .total-value.changed{
+      transform:translateY(-3px);
+    }
+
+    .sequence{
+      width:min(100%,980px);
+      margin:0 auto;
+      padding:150px 24px 100px;
+    }
+
+    .cost{
+      min-height:92vh;
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto;
+      gap:40px;
+      align-items:center;
+      border-bottom:1px solid var(--line);
+      opacity:.22;
+      transform:translateY(30px);
+      transition:opacity .5s ease,transform .5s ease;
+    }
+
+    .cost.active{
+      opacity:1;
+      transform:translateY(0);
+    }
+
+    .cost-copy{
+      max-width:720px;
+    }
+
+    .cost-copy p{
+      margin:0;
+      font-size:clamp(30px,4.4vw,62px);
+      line-height:1.12;
+      letter-spacing:-.025em;
+    }
+
+    .cost-copy small{
+      display:block;
+      margin-top:22px;
+      max-width:560px;
+      font-size:16px;
+      line-height:1.55;
+      color:rgba(232,223,205,.52);
+    }
+
+    .amount{
+      align-self:center;
+      font-size:clamp(25px,3vw,42px);
+      color:var(--muted);
+      min-width:130px;
+      text-align:right;
+    }
+
+    .cost.active .amount{
+      color:var(--red);
+    }
+
+    .reckoning{
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:100px 24px;
+    }
+
+    .reckoning-inner{
+      width:min(100%,900px);
+      text-align:center;
+    }
+
+    .reckoning h2{
+      margin:0;
+      font-size:clamp(52px,9vw,120px);
+      line-height:.9;
+      font-weight:400;
+      letter-spacing:-.055em;
+      text-transform:uppercase;
+    }
+
+    .reckoning h2 span{
+      color:var(--red);
+    }
+
+    .reckoning p{
+      max-width:680px;
+      margin:38px auto 0;
+      font-size:clamp(21px,2.5vw,31px);
+      line-height:1.5;
+      color:rgba(232,223,205,.72);
+    }
+
+    .reveal{
+      margin-top:44px;
+      appearance:none;
+      border:1px solid var(--red);
+      background:transparent;
+      color:var(--paper);
+      padding:17px 24px;
+      font:700 11px/1 Arial,sans-serif;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+      cursor:pointer;
+    }
+
+    .poem-section{
+      display:none;
+      padding:100px 24px 120px;
+      background:#020202;
+    }
+
+    body.revealed .experience{display:none}
+
+    body.revealed .poem-section{
+      display:block;
+      animation:fadeIn 1s ease both;
+    }
+
+    .poem-inner{
+      width:min(100%,900px);
+      margin:0 auto;
+    }
+
+    .poem-title{
+      margin:0 0 58px;
+      font-size:clamp(52px,8vw,110px);
+      line-height:.9;
+      font-weight:400;
+      letter-spacing:-.055em;
+      text-transform:uppercase;
+    }
+
+    .poem{
+      font-size:clamp(19px,2vw,28px);
+      line-height:1.68;
+      white-space:pre-wrap;
+    }
+
+    .closing{
+      margin-top:100px;
+      padding-top:34px;
+      border-top:1px solid var(--line);
+      font-size:clamp(30px,4vw,54px);
+      line-height:1.16;
+    }
+
+    .foyer{
+      display:inline-block;
+      margin-top:42px;
+      border:1px solid var(--gold);
+      padding:15px 20px;
+      color:var(--paper);
+      text-decoration:none;
+      font:700 10px/1 Arial,sans-serif;
+      letter-spacing:.2em;
+      text-transform:uppercase;
+    }
+
+    @media(max-width:700px){
+      .header span:last-child{display:none}
+
+      .total{
+        top:64px;
+        right:18px;
+      }
+
+      .sequence{
+        padding-top:130px;
+      }
+
+      .cost{
+        grid-template-columns:1fr;
+        gap:26px;
+        align-content:center;
+      }
+
+      .amount{
+        text-align:left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <span>Paid in Installments</span>
+    <span>The Kind of Love That Leaves Bruises</span>
+  </header>
+
+  <section class="intro">
+    <div class="intro-inner">
+      <div class="kicker">What It Cost Them</div>
+      <h1>Paid in<br />Installments</h1>
+      <p>
+        Keep reading. The amount changes as the cost becomes visible.
+      </p>
+      <button class="begin" id="begin">Begin</button>
+    </div>
+  </section>
+
+  <main class="experience">
+    <div class="total">
+      <span class="total-label">So Far</span>
+      <span class="total-value" id="totalValue">$0</span>
+    </div>
+
+    <section class="sequence">
+      <article class="cost" data-amount="18">
+        <div class="cost-copy">
+          <p>Words withheld until the silence belonged to both of them.</p>
+          <small>They paid for what was never said.</small>
+        </div>
+        <div class="amount">$18</div>
+      </article>
+
+      <article class="cost" data-amount="27">
+        <div class="cost-copy">
+          <p>Patience used past the point where patience was kind.</p>
+          <small>They kept waiting because leaving felt cruel.</small>
+        </div>
+        <div class="amount">$27</div>
+      </article>
+
+      <article class="cost" data-amount="41">
+        <div class="cost-copy">
+          <p>Every rescue required someone else to go under.</p>
+          <small>One person survived. The other became exhausted.</small>
+        </div>
+        <div class="amount">$41</div>
+      </article>
+
+      <article class="cost" data-amount="33">
+        <div class="cost-copy">
+          <p>Truths softened until they could no longer change anything.</p>
+          <small>The blade remained. Only the silk was visible.</small>
+        </div>
+        <div class="amount">$33</div>
+      </article>
+
+      <article class="cost" data-amount="52">
+        <div class="cost-copy">
+          <p>Forgiveness spent again on the same injury.</p>
+          <small>Each payment bought another day, never a different life.</small>
+        </div>
+        <div class="amount">$52</div>
+      </article>
+
+      <article class="cost" data-amount="64">
+        <div class="cost-copy">
+          <p>Absence, paid after nothing remained to repair.</p>
+          <small>The final amount appeared when the person was already gone.</small>
+        </div>
+        <div class="amount">$64</div>
+      </article>
+    </section>
+
+    <section class="reckoning">
+      <div class="reckoning-inner">
+        <h2>The cost was <span>too high.</span></h2>
+        <p>
+          The amount was never money. It was the part of themselves they spent
+          trying to remain.
+        </p>
+        <button class="reveal" id="revealPoem">Read the Work</button>
+      </div>
+    </section>
+  </main>
+
+  <section class="poem-section">
+    <div class="poem-inner">
+      <h2 class="poem-title">Paid in Installments</h2>
+
+      <div class="poem">I think I must be paid for in installments
+                         little debts
+                              scattered on the tables
+                                   of those I've loved,
+                                        coins left behind
+                                        forgotten,
+                                        quietly counting themselves.
+
+                        I have always been too expensive;
+     the burden of a gaze measured in quiet sighs,
+          my silences heavy as stones
+               you carry one,
+                         two,
+                              three
+               and still, there is more of me to shoulder.
+
+ And how do I tell you,
+          that I felt your knees buckle
+                    beneath the weight of my unspoken nights
+
+                              the careful selection
+                                   of my words,
+                                        so many knives wrapped in silk,
+                                        so many truths kept pocketed,
+
+                                             holding us down
+                                                  until we no longer move freely
+                                                       among each other's thoughts?
+
+This is the price
+     the erosion of patience,
+                         of kindness,
+                              of soft hands held in darkness
+
+     small payments made daily,
+          until there is only absence left
+               to settle the balance.
+
+I stand here,
+          a storm you never asked for,
+               rain pooling in your open hands,
+
+                    asking silently
+                         if this flood is worth enduring
+                              for glimpses of sunlit moments
+
+                                   brief warmth between clouds,
+                                   fleeting peace before thunder rumbles again.
+
+Some days, I see clearly:
+
+     I am the thing you rescue from drowning,
+          only to drown yourself,
+               with the maelstrom I carry inside.
+
+I wonder,
+     quietly,
+          if anyone can afford the expense of loving me
+
+               if I can afford it myself,
+                    if the currency of my heart
+                         is accepted anywhere but here,
+                              in this shadowed market of confusion.
+
+But still,
+     I lay out my broken pieces
+           wares on a tattered blanket
+
+               hoping you'll find something worth keeping,
+
+                    knowing all the while
+                         that the price
+                              is far
+                                   too
+                                        high.</div>
+
+      <div class="closing">
+        Some people survive loving us by leaving before the final payment.
+      </div>
+
+      <a class="foyer" href="https://thebastardsaint.com/the-foyer">
+        Return to the Foyer
+      </a>
+    </div>
+  </section>
+
+  <script>
+    const begin = document.getElementById("begin");
+    const costs = [...document.querySelectorAll(".cost")];
+    const totalValue = document.getElementById("totalValue");
+    const revealPoem = document.getElementById("revealPoem");
+
+    begin.addEventListener("click", () => {
+      document.body.classList.add("started");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+
+          entry.target.classList.add("active");
+
+          let total = 0;
+          costs.forEach((cost) => {
+            if (cost.classList.contains("active")) {
+              total += Number(cost.dataset.amount || 0);
+            }
+          });
+
+          totalValue.textContent = `$${total}`;
+          totalValue.classList.add("changed");
+          setTimeout(() => totalValue.classList.remove("changed"), 350);
+        });
+      },
+      { threshold: .58 }
+    );
+
+    costs.forEach((cost) => observer.observe(cost));
+
+    revealPoem.addEventListener("click", () => {
+      document.body.classList.add("revealed");
+      window.scrollTo({ top: 0, behavior: "instant" });
+    });
+  </script>
+</body>
+</html>
